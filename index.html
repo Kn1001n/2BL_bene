@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -18,9 +19,10 @@
         .kor-txt { font-size: 0.85em; color: #007bff; margin-top: 5px; font-weight: bold; }
         .row-detail { display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 10px; color: #555; background: #f0f4f0; padding: 8px; border-radius: 5px; }
         .btn-add { width: 100%; padding: 12px; background: #fff; border: 2px dashed #4caf50; color: #2e7d32; border-radius: 8px; cursor: pointer; margin: 10px 0; font-weight: bold; }
-        
         .final-area { background: #fffde7; border: 2px solid #fbc02d; padding: 15px; border-radius: 10px; margin-top: 20px; }
         .final-val { font-size: 1.5em; color: #d32f2f; font-weight: 900; display: block; margin: 8px 0; }
+        
+        /* 알림 메시지 디자인 강화 */
         .zero-msg { color: #1565c0; font-weight: bold; font-size: 0.85em; margin-top: 10px; padding: 12px; background: #e3f2fd; border-radius: 8px; border: 1px solid #90caf9; line-height: 1.5; }
         
         .total-summary { background: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; font-weight: bold; text-align: right; border: 2px solid #ef9a9a; color: #c62828; }
@@ -50,10 +52,10 @@
         <label>🗓️ 마지막 잔금 완납 예정일</label>
         <input type="date" id="final-date" oninput="calculate()">
         <div style="margin-top:15px; font-size:0.9em; border-top:1px dashed #fbc02d; padding-top:10px;">
-            현재 남은 원금: <b id="f-rem-bal">0원</b><br>
-            적용일수: <b id="f-days">0일</b> | 혜택이자: <b id="f-int" style="color:#d32f2f;">0원</b>
+            적용일수: <b id="f-days">0일</b> | 혜택이자: <b id="f-int">0원</b>
             <span class="final-val" id="f-pay">실 입금액: 0원</span>
             <div id="f-pay-kor" class="kor-txt">영 원</div>
+            
             <div id="zero-notice" class="zero-msg" style="display:none;"></div>
         </div>
     </div>
@@ -65,7 +67,8 @@
     <div class="footer-red">
         <strong>⚠️ 주의사항</strong><br>
         1. 1,000만 원 이상 입금 시 선납할인이 적용됩니다.<br>
-        2. 실제 입금액은 시행사 고지서와 반드시 대조하세요.
+        2. 잔액을 초과하여 입금할 수 없도록 자동 조정됩니다.<br>
+        3. 실제 입금액은 시행사 고지서와 반드시 대조하세요.
     </div>
 </div>
 
@@ -105,10 +108,11 @@
                 <input type="text" class="i-amt" placeholder="입금액" oninput="handleRowInput(this, '${id}')" style="flex:1.2; font-size:0.9em;">
             </div>
             <div id="${id}-kor" class="kor-txt" style="font-size:0.75em;">영 원</div>
-            <div class="warning-msg" id="${id}-warn">⚠️ 잔액 초과!</div>
+            <div class="warning-msg" id="${id}-warn">⚠️ 잔액 초과로 조정되었습니다.</div>
             <div class="row-detail">
-                <span>이자혜택: <b class="r-int">0원</b></span>
-                <span>차감 후 잔액: <b class="r-bal">0원</b></span>
+                <span>일수: <b class="r-days">0일</b></span>
+                <span>이자: <b class="r-int">0원</b></span>
+                <span>남은잔금: <b class="r-bal">0원</b></span>
             </div>
             <div onclick="document.getElementById('${id}').remove();calculate();" style="text-align:right; color:#ccc; cursor:pointer; font-size:0.75em; margin-top:5px;">삭제</div>
         `;
@@ -143,16 +147,21 @@
             }
 
             let interest = 0;
-            if (dateInput.value && aVal >= 10000000) {
+            if (dateInput.value && aVal > 0) {
                 const payDate = new Date(dateInput.value);
                 let start = payDate < START_D ? START_D : payDate;
                 let days = Math.min(100, Math.max(0, Math.ceil((END_D - start) / (1000*60*60*24)) + 1));
-                interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
+                
+                if (aVal >= 10000000) {
+                    interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
+                }
             }
+            if (interest > (currentBal - aVal)) interest = Math.max(0, currentBal - aVal);
 
-            currentBal -= aVal; // 원금만 먼저 뺍니다.
+            currentBal = currentBal - aVal - interest;
             totalIntSum += interest;
             
+            row.querySelector('.r-days').innerText = (dateInput.value ? Math.min(100, Math.max(0, Math.ceil((END_D - (new Date(dateInput.value) < START_D ? START_D : new Date(dateInput.value))) / (1000*60*60*24)) + 1)) : 0) + "일";
             row.querySelector('.r-int').innerText = interest.toLocaleString() + "원";
             row.querySelector('.r-bal').innerText = Math.max(0, currentBal).toLocaleString() + "원";
         });
@@ -160,18 +169,18 @@
         const fDateVal = document.getElementById('final-date').value;
         const zeroNotice = document.getElementById('zero-notice');
         
-        document.getElementById('f-rem-bal').innerText = currentBal.toLocaleString() + "원";
-
         if (fDateVal && currentBal > 0) {
             const fDate = new Date(fDateVal);
             let start = fDate < START_D ? START_D : fDate;
             let days = Math.min(100, Math.max(0, Math.ceil((END_D - start) / (1000*60*60*24)) + 1));
             
             let finalInt = Math.floor((currentBal * RATE * days / 365) / 10) * 10;
-            
+            let originalBal = currentBal; // 이자 빼기 전 잔금
+
             if (finalInt >= currentBal) {
                 finalInt = currentBal;
-                zeroNotice.innerHTML = `✨ <b>안내:</b> 남은 원금(${currentBal.toLocaleString()}원)이 할인 혜택으로 전액 상계되었습니다. 입금할 금액이 없습니다.`;
+                // 💡 안내 문구 강화: 원래 잔금이 얼마였는지 보여줌
+                zeroNotice.innerHTML = `✨ <b>안내:</b> 남은 잔금 ${originalBal.toLocaleString()}원이 선납 할인 혜택(${finalInt.toLocaleString()}원)으로 모두 상계되었습니다. <br>따라서 <b>실제 납부할 금액은 0원</b>입니다.`;
                 zeroNotice.style.display = 'block';
             } else {
                 zeroNotice.style.display = 'none';
