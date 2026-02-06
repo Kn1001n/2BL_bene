@@ -10,8 +10,6 @@
         .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border-left: 10px solid #4caf50; }
         header { text-align: center; margin-bottom: 20px; background: #f1f8e9; padding: 20px; border-radius: 10px; border: 2px dashed #4caf50; }
         h1 { font-size: 1.25em; color: #2e7d32; margin: 0; font-weight: 900; }
-        h2 { font-size: 1.1em; color: #388e3c; margin: 10px 0 5px 0; font-weight: 800; }
-        .sub-title { font-size: 0.9em; color: #1b5e20; font-weight: 900; background: #c8e6c9; padding: 3px 12px; border-radius: 20px; }
         .card { border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-bottom: 12px; background: #fafafa; }
         .bg-navy { background: #1a2a40; color: white; border: none; }
         label { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block; }
@@ -21,10 +19,9 @@
         .btn-add { width: 100%; padding: 12px; background: #fff; border: 2px dashed #4caf50; color: #2e7d32; border-radius: 8px; cursor: pointer; margin: 10px 0; font-weight: bold; }
         .final-area { background: #fffde7; border: 2px solid #fbc02d; padding: 15px; border-radius: 10px; margin-top: 20px; }
         .final-val { font-size: 1.5em; color: #d32f2f; font-weight: 900; display: block; margin: 8px 0; }
-        .zero-msg { color: #d32f2f; font-weight: bold; font-size: 0.85em; margin-top: 10px; padding: 12px; background: #ffebee; border-radius: 8px; border: 1px solid #ef9a9a; line-height: 1.5; }
+        .refund-box { background: #e3f2fd; border: 2px solid #2196f3; color: #0d47a1; padding: 15px; border-radius: 10px; margin-top: 10px; font-weight: bold; }
         .total-summary { background: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; font-weight: bold; text-align: right; border: 2px solid #ef9a9a; color: #c62828; }
         .footer-red { background: #fff5f5; border-radius: 10px; padding: 15px; margin-top: 10px; border: 1px solid #ffa8a8; color: #e03131; font-size: 0.8em; line-height: 1.6; text-align: center; }
-        .warning-msg { font-size: 0.75em; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -33,7 +30,6 @@
     <header>
         <h1>📝 지제역 풍경채어바니티 2BL</h1>
         <h2>잔금선납할인 7% 모의계산기</h2>
-        <div class="sub-title">3/24 완납 조건부 계산기</div>
     </header>
 
     <div class="card bg-navy">
@@ -49,22 +45,28 @@
         <label>🗓️ 마지막 잔금 완납 예정일</label>
         <input type="date" id="final-date" oninput="calculate()">
         <div style="margin-top:15px; font-size:0.9em; border-top:1px dashed #fbc02d; padding-top:10px;">
-            중간 원금 납부 후 잔액: <b id="f-rem-bal">0원</b><br>
+            중간 정산 후 잔액: <b id="f-rem-bal">0원</b><br>
             완납일 기준 혜택 일수: <b id="f-days">0일</b><br>
             마지막 혜택 이자: <b id="f-int" style="color:#d32f2f;">0원</b>
             <span class="final-val" id="f-pay">최종 실 입금액: 0원</span>
             <div id="f-pay-kor" class="kor-txt">영 원</div>
-            <div id="zero-notice" class="zero-msg" style="display:none;"></div>
+            
+            <div id="refund-area" class="refund-box" style="display:none;">
+                💰 <b>청구할 이자(환급):</b> <span id="refund-val">0원</span><br>
+                <small>입금액과 이자가 잔금을 초과하여 해당 금액만큼 환급 대상입니다.</small>
+            </div>
+            <div id="zero-notice" style="color:red; font-weight:bold; margin-top:10px; display:none;"></div>
         </div>
     </div>
 
     <div class="total-summary">
-        적용된 총 혜택 합계: <span id="total-interest" style="font-size:1.3em;">0</span>원
+        발생한 총 혜택 이자: <span id="total-interest" style="font-size:1.3em;">0</span>원
     </div>
 
     <div class="footer-red">
-        <strong>⚠️ 중요: 3/24 완납 조건</strong><br>
-        완납일이 <b>2026년 3월 24일</b>을 초과할 경우, 기존의 모든 선납할인 혜택은 실효(0원)되어 잔액에 다시 합산됩니다.
+        <strong>⚠️ 안내</strong><br>
+        1. 3/24 완납 시에만 혜택이 유지됩니다.<br>
+        2. 잔액이 마이너스(-)가 될 경우 해당 금액은 환급/청구 가능 이자입니다.
     </div>
 </div>
 
@@ -81,6 +83,7 @@
     }
 
     function numberToKorean(number) {
+        if (number < 0) return "마이너스 " + numberToKorean(Math.abs(number));
         const units = ['', '만', '억', '조'];
         let result = '';
         let num = parseInt(number);
@@ -104,10 +107,10 @@
                 <input type="text" class="i-amt" placeholder="입금액" oninput="handleRowInput(this, '${id}')" style="flex:1.2; font-size:0.9em;">
             </div>
             <div id="${id}-kor" class="kor-txt" style="font-size:0.75em;">영 원</div>
-            <div class="warning-msg" id="${id}-warn"></div>
+            <div class="warning-msg" id="${id}-warn" style="font-size:0.75em; font-weight:bold; margin-top:5px;"></div>
             <div class="row-detail">
-                <span>계산이자: <b class="r-int">0원</b></span>
-                <span><b>차감 잔액:</b> <b class="r-bal">0원</b></span>
+                <span>이자: <b class="r-int">0원</b></span>
+                <span><b>장부상 잔액:</b> <b class="r-bal">0원</b></span>
             </div>
             <div onclick="document.getElementById('${id}').remove();calculate();" style="text-align:right; color:#ccc; cursor:pointer; font-size:0.75em; margin-top:5px;">삭제</div>
         `;
@@ -124,14 +127,13 @@
     function calculate() {
         const fDateInput = document.getElementById('final-date');
         const fDate = fDateInput.value ? new Date(fDateInput.value) : null;
-        const isExpired = fDate && fDate > LIMIT_D; // 3/24 초과 여부
+        const isExpired = fDate && fDate > LIMIT_D;
 
         let baseTotal = parseInt(document.getElementById('base-total').value.replace(/,/g, '')) || 0;
         let currentBal = baseTotal;
         let totalIntSum = 0;
         const rows = document.querySelectorAll('#row-area .card');
 
-        // 중간 납부 계산
         rows.forEach(row => {
             const dateInput = row.querySelector('.i-date');
             const amtInput = row.querySelector('.i-amt');
@@ -144,59 +146,63 @@
                 let days = Math.floor((END_D - payDate) / (1000 * 60 * 60 * 24)) + 1;
                 days = Math.max(0, Math.min(100, days));
 
-                // 완납일이 지났거나 입금액 1천만 원 미만이면 이자 0
-                if (isExpired) {
-                    interest = 0;
+                if (!isExpired && aVal >= 10000000) {
+                    interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
+                    warn.innerText = "✅ 7% 선납 혜택 적용 (" + days + "일)";
+                    warn.style.color = "#2e7d32";
+                } else if (isExpired) {
                     warn.innerText = "⚠️ 완납 기한 도과로 혜택 소멸";
                     warn.style.color = "#d32f2f";
-                } else if (aVal < 10000000) {
-                    interest = 0;
+                } else {
                     warn.innerText = "⚠️ 1,000만 원 미만 혜택 제외";
                     warn.style.color = "#d32f2f";
-                } else {
-                    interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
-                    warn.innerText = "✅ 선납 혜택 적용 중 (" + days + "일)";
-                    warn.style.color = "#2e7d32";
                 }
             }
             
             currentBal = currentBal - aVal - interest;
             totalIntSum += interest;
             row.querySelector('.r-int').innerText = interest.toLocaleString() + "원";
-            row.querySelector('.r-bal').innerText = Math.max(0, currentBal).toLocaleString() + "원";
+            row.querySelector('.r-bal').innerText = currentBal.toLocaleString() + "원";
+            if (currentBal < 0) row.querySelector('.r-bal').style.color = "#007bff";
+            else row.querySelector('.r-bal').style.color = "#2e7d32";
         });
 
-        // 마지막 완납 계산
+        document.getElementById('f-rem-bal').innerText = currentBal.toLocaleString() + "원";
+        const refundArea = document.getElementById('refund-area');
         const zeroNotice = document.getElementById('zero-notice');
-        document.getElementById('f-rem-bal').innerText = Math.max(0, currentBal).toLocaleString() + "원";
 
-        if (fDate && currentBal > 0) {
+        if (fDate) {
             let finalInt = 0;
             let fDays = 0;
-
-            if (isExpired) {
-                zeroNotice.innerHTML = "🚨 3월 24일이 경과되어 모든 선납할인이 취소되었습니다. 원금 전액을 납부해야 합니다.";
-                zeroNotice.style.display = 'block';
-                fDays = 0;
-                finalInt = 0;
-            } else {
+            if (!isExpired) {
                 fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
                 fDays = Math.max(0, Math.min(100, fDays));
-                finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
+                // 마지막 잔액이 플러스일 때만 마지막 이자 계산
+                if (currentBal > 0) {
+                    finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
+                }
                 zeroNotice.style.display = 'none';
+            } else {
+                zeroNotice.innerText = "🚨 3/24 기한 도과로 모든 혜택 소멸";
+                zeroNotice.style.display = 'block';
+                totalIntSum = 0;
             }
 
             let finalPay = currentBal - finalInt;
             document.getElementById('f-days').innerText = fDays + "일";
             document.getElementById('f-int').innerText = finalInt.toLocaleString() + "원";
-            document.getElementById('f-pay').innerText = "최종 실 입금액: " + Math.max(0, finalPay).toLocaleString() + "원";
-            document.getElementById('f-pay-kor').innerText = numberToKorean(Math.max(0, finalPay)) + " 원";
-            totalIntSum += finalInt;
-        } else {
-            document.getElementById('f-days').innerText = "0일";
-            document.getElementById('f-int').innerText = "0원";
-            document.getElementById('f-pay').innerText = "최종 실 입금액: 0원";
-            zeroNotice.style.display = 'none';
+            
+            if (finalPay < 0 && !isExpired) {
+                document.getElementById('f-pay').innerText = "최종 실 입금액: 0원";
+                document.getElementById('f-pay-kor').innerText = "영 원";
+                refundArea.style.display = 'block';
+                document.getElementById('refund-val').innerText = Math.abs(finalPay).toLocaleString() + "원";
+            } else {
+                document.getElementById('f-pay').innerText = "최종 실 입금액: " + Math.max(0, finalPay).toLocaleString() + "원";
+                document.getElementById('f-pay-kor').innerText = numberToKorean(Math.max(0, finalPay)) + " 원";
+                refundArea.style.display = 'none';
+            }
+            if (!isExpired) totalIntSum += finalInt;
         }
         document.getElementById('total-interest').innerText = totalIntSum.toLocaleString();
     }
