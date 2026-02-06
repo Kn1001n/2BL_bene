@@ -4,69 +4,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지제역 풍경채 2BL 잔금 계산기</title>
+    <title>지제역 풍경채 2BL 7% 선납할인 모의계산기</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background: #e8f5e9; color: #333; padding: 15px; }
-        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border-left: 10px solid #4caf50; }
-        header { text-align: center; margin-bottom: 20px; background: #f1f8e9; padding: 20px; border-radius: 10px; border: 2px dashed #4caf50; }
-        h1 { font-size: 1.25em; color: #2e7d32; margin: 0; font-weight: 900; }
-        .card { border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-bottom: 12px; background: #fafafa; }
-        .bg-navy { background: #1a2a40; color: white; border: none; }
-        label { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; display: block; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 1.1em; font-weight: bold; background: #fff; }
-        .kor-txt { font-size: 0.85em; color: #007bff; margin-top: 5px; font-weight: bold; }
-        .row-detail { display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 10px; color: #555; background: #f0f4f0; padding: 8px; border-radius: 5px; }
-        .btn-add { width: 100%; padding: 12px; background: #fff; border: 2px dashed #4caf50; color: #2e7d32; border-radius: 8px; cursor: pointer; margin: 10px 0; font-weight: bold; }
-        .final-area { background: #fffde7; border: 2px solid #fbc02d; padding: 15px; border-radius: 10px; margin-top: 20px; }
-        .final-val { font-size: 1.5em; color: #d32f2f; font-weight: 900; display: block; margin: 8px 0; }
-        .refund-box { background: #e3f2fd; border: 2px solid #2196f3; color: #0d47a1; padding: 15px; border-radius: 10px; margin-top: 10px; font-weight: bold; }
-        .total-summary { background: #ffebee; padding: 15px; border-radius: 10px; margin-top: 15px; font-weight: bold; text-align: right; border: 2px solid #ef9a9a; color: #c62828; }
-        .footer-red { background: #fff5f5; border-radius: 10px; padding: 15px; margin-top: 10px; border: 1px solid #ffa8a8; color: #e03131; font-size: 0.8em; line-height: 1.6; text-align: center; }
+        :root { --primary: #2e7d32; --bg: #f4f7f4; --card-bg: #ffffff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 480px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: white; padding: 12px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.2em; letter-spacing: -1px; }
+        .base-input-area { padding: 12px; background: #1a2a40; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .base-input-area input { width: 55%; background: transparent; border: none; border-bottom: 2px solid #4db6ac; color: #fff; font-size: 1.2em; font-weight: bold; text-align: right; outline: none; }
+        .passbook-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .passbook-table th { background: #eee; padding: 8px 5px; color: #666; border-bottom: 1px solid #ddd; }
+        .passbook-table td { padding: 10px 5px; border-bottom: 1px dotted #ddd; text-align: center; }
+        .passbook-table input { width: 90%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; text-align: center; }
+        .txt-red { color: #d32f2f; font-weight: bold; }
+        .btn-add { width: 100%; padding: 12px; background: #fff; border: none; border-bottom: 2px solid #eee; color: var(--primary); font-weight: bold; cursor: pointer; }
+        
+        .final-box { background: #fffde7; padding: 15px; border-top: 3px double #fbc02d; }
+        .final-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95em; color: #444; }
+        .final-main { text-align: center; margin-top: 8px; padding: 12px; background: #fff; border: 2px solid #fbc02d; border-radius: 10px; }
+        .final-main strong { font-size: 1.5em; color: #d32f2f; display: block; }
+        
+        /* 마이너스 잔액 강조 스타일 */
+        .minus-val { color: #1565c0; font-weight: bold; font-size: 1.1em; }
+        .refund-notice { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-top: 10px; border: 1px solid #2196f3; font-size: 0.95em; color: #0d47a1; text-align: center; }
+        .total-benefit-bar { background: #1a2a40; color: #fff; padding: 12px; text-align: center; font-weight: bold; font-size: 1em; }
+        .expired { background: #ffebee !important; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <h1>📝 지제역 풍경채어바니티 2BL</h1>
-        <h2>잔금선납할인 7% 모의계산기</h2>
-    </header>
+<div class="container" id="main-cont">
+    <header><h1>지제역 풍경채 2BL 7% 선납통장</h1></header>
 
-    <div class="card bg-navy">
-        <label style="color:#a5d6a7;">나의 초기 총 잔금</label>
-        <input type="text" id="base-total" oninput="updateBase(this)" placeholder="총 잔금을 입력하세요">
-        <div id="base-total-kor" class="kor-txt" style="color:#81d4fa;">영 원</div>
+    <div class="base-input-area">
+        <label style="font-size:1em;">당초 잔금액</label>
+        <input type="text" id="base-total" oninput="updateFormat(this)" placeholder="0">
     </div>
 
-    <div id="row-area"></div>
-    <button class="btn-add" onclick="addRow()">+ 중간 납부 내역 추가</button>
+    <table class="passbook-table">
+        <thead>
+            <tr>
+                <th width="30%">입금일</th>
+                <th width="35%">입금원금</th>
+                <th width="15%">일수</th>
+                <th width="20%">이자혜택</th>
+            </tr>
+        </thead>
+        <tbody id="row-body"></tbody>
+    </table>
+    
+    <button class="btn-add" onclick="addRow()">+ 중간 입금 내역 추가</button>
 
-    <div class="final-area">
-        <label>🗓️ 마지막 잔금 완납 예정일</label>
-        <input type="date" id="final-date" oninput="calculate()">
-        <div style="margin-top:15px; font-size:0.9em; border-top:1px dashed #fbc02d; padding-top:10px;">
-            중간 정산 후 잔액: <b id="f-rem-bal">0원</b><br>
-            완납일 기준 혜택 일수: <b id="f-days">0일</b><br>
-            마지막 혜택 이자: <b id="f-int" style="color:#d32f2f;">0원</b>
-            <span class="final-val" id="f-pay">최종 실 입금액: 0원</span>
-            <div id="f-pay-kor" class="kor-txt">영 원</div>
-            
-            <div id="refund-area" class="refund-box" style="display:none;">
-                💰 <b>청구할 이자(환급):</b> <span id="refund-val">0원</span><br>
-                <small>입금액과 이자가 잔금을 초과하여 해당 금액만큼 환급 대상입니다.</small>
-            </div>
-            <div id="zero-notice" style="color:red; font-weight:bold; margin-top:10px; display:none;"></div>
+    <div class="final-box">
+        <div class="final-row">
+            <span>중간 정산 후 잔금 잔액</span>
+            <span id="res-bal" style="font-weight:bold;">0</span>
+        </div>
+        <div class="final-row">
+            <label>🗓️ 최종 완납 예정일</label>
+            <input type="date" id="final-date" oninput="calculate()" style="font-size:1em; border:1px solid #fbc02d; padding:2px;">
+        </div>
+        <div class="final-row" style="color:#d32f2f;">
+            <span>최종 회차 이자혜택</span>
+            <span>- <span id="f-int">0</span></span>
+        </div>
+        <div class="final-row" style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;">
+            <span>최종 장부상 잔액</span>
+            <span id="total-book-bal" class="minus-val">0</span>
+        </div>
+        
+        <div class="final-main">
+            <label id="final-label" style="font-size:0.85em; font-weight:bold; color:#666;">최종 실 입금액 (분양대금)</label>
+            <strong id="final-pay">0</strong>
+        </div>
+
+        <div id="refund-msg" class="refund-notice" style="display:none;">
+            💰 <b>청구/환급 가능 이자: <span id="refund-amt">0</span>원</b><br>
+            <small style="font-weight:normal;">이자가 잔금을 초과하여 환급 대상입니다.</small>
+        </div>
+        
+        <div id="warn-msg" style="color:red; font-size:0.85em; font-weight:bold; margin-top:10px; display:none; text-align:center;">
+            🚨 3/24 기한 도과! 모든 선납 혜택이 소멸되었습니다.
         </div>
     </div>
 
-    <div class="total-summary">
-        발생한 총 혜택 이자: <span id="total-interest" style="font-size:1.3em;">0</span>원
-    </div>
-
-    <div class="footer-red">
-        <strong>⚠️ 안내</strong><br>
-        1. 3/24 완납 시에만 혜택이 유지됩니다.<br>
-        2. 잔액이 마이너스(-)가 될 경우 해당 금액은 환급/청구 가능 이자입니다.
+    <div class="total-benefit-bar">
+        총 선납할인 혜택: <span id="total-benefit" style="color:#4db6ac;">0</span>원
     </div>
 </div>
 
@@ -75,138 +99,93 @@
     const END_D = new Date('2026-05-04');
     const LIMIT_D = new Date('2026-03-24');
 
-    function updateBase(el) {
+    function updateFormat(el) {
         let val = el.value.replace(/[^0-9]/g, '');
         el.value = val ? Number(val).toLocaleString() : '';
-        document.getElementById('base-total-kor').innerText = val ? numberToKorean(val) + " 원" : "영 원";
         calculate();
-    }
-
-    function numberToKorean(number) {
-        if (number < 0) return "마이너스 " + numberToKorean(Math.abs(number));
-        const units = ['', '만', '억', '조'];
-        let result = '';
-        let num = parseInt(number);
-        if (num === 0 || isNaN(num)) return '영';
-        for (let i = 0; num > 0; i++) {
-            let chunk = num % 10000;
-            if (chunk > 0) result = chunk.toLocaleString() + units[i] + ' ' + result;
-            num = Math.floor(num / 10000);
-        }
-        return result.trim();
     }
 
     function addRow() {
-        const id = 'row-' + Date.now();
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.id = id;
-        div.innerHTML = `
-            <div style="display:flex; gap:10px; margin-bottom:5px;">
-                <input type="date" class="i-date" oninput="calculate()" style="flex:1; font-size:0.9em;">
-                <input type="text" class="i-amt" placeholder="입금액" oninput="handleRowInput(this, '${id}')" style="flex:1.2; font-size:0.9em;">
-            </div>
-            <div id="${id}-kor" class="kor-txt" style="font-size:0.75em;">영 원</div>
-            <div class="warning-msg" id="${id}-warn" style="font-size:0.75em; font-weight:bold; margin-top:5px;"></div>
-            <div class="row-detail">
-                <span>이자: <b class="r-int">0원</b></span>
-                <span><b>장부상 잔액:</b> <b class="r-bal">0원</b></span>
-            </div>
-            <div onclick="document.getElementById('${id}').remove();calculate();" style="text-align:right; color:#ccc; cursor:pointer; font-size:0.75em; margin-top:5px;">삭제</div>
+        const tbody = document.getElementById('row-body');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="date" class="i-date" oninput="calculate()"></td>
+            <td><input type="text" class="i-amt" oninput="updateFormat(this)" placeholder="0"></td>
+            <td class="r-days">-</td>
+            <td class="r-int txt-red">0</td>
         `;
-        document.getElementById('row-area').appendChild(div);
-    }
-
-    function handleRowInput(el, rowId) {
-        let val = el.value.replace(/[^0-9]/g, '');
-        el.value = val ? Number(val).toLocaleString() : '';
-        document.getElementById(rowId + '-kor').innerText = val ? numberToKorean(val) : "영 원";
-        calculate();
+        tbody.appendChild(tr);
     }
 
     function calculate() {
-        const fDateInput = document.getElementById('final-date');
-        const fDate = fDateInput.value ? new Date(fDateInput.value) : null;
-        const isExpired = fDate && fDate > LIMIT_D;
-
         let baseTotal = parseInt(document.getElementById('base-total').value.replace(/,/g, '')) || 0;
         let currentBal = baseTotal;
+        const fDateVal = document.getElementById('final-date').value;
+        const isExpired = fDateVal && new Date(fDateVal) > LIMIT_D;
+        
+        document.getElementById('main-cont').className = isExpired ? 'container expired' : 'container';
+        document.getElementById('warn-msg').style.display = isExpired ? 'block' : 'none';
+
+        const rows = document.querySelectorAll('#row-body tr');
         let totalIntSum = 0;
-        const rows = document.querySelectorAll('#row-area .card');
 
         rows.forEach(row => {
-            const dateInput = row.querySelector('.i-date');
-            const amtInput = row.querySelector('.i-amt');
-            const warn = row.querySelector('.warning-msg');
-            let aVal = parseInt(amtInput.value.replace(/,/g, '')) || 0;
+            const dVal = row.querySelector('.i-date').value;
+            const aVal = parseInt(row.querySelector('.i-amt').value.replace(/,/g, '')) || 0;
+            const dayCell = row.querySelector('.r-days');
+            const intCell = row.querySelector('.r-int');
 
             let interest = 0;
-            if (dateInput.value) {
-                const payDate = new Date(dateInput.value);
-                let days = Math.floor((END_D - payDate) / (1000 * 60 * 60 * 24)) + 1;
+            if (dVal && !isExpired && aVal >= 10000000) {
+                const pDate = new Date(dVal);
+                let days = Math.floor((END_D - pDate) / (1000 * 60 * 60 * 24)) + 1;
                 days = Math.max(0, Math.min(100, days));
-
-                if (!isExpired && aVal >= 10000000) {
-                    interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
-                    warn.innerText = "✅ 7% 선납 혜택 적용 (" + days + "일)";
-                    warn.style.color = "#2e7d32";
-                } else if (isExpired) {
-                    warn.innerText = "⚠️ 완납 기한 도과로 혜택 소멸";
-                    warn.style.color = "#d32f2f";
-                } else {
-                    warn.innerText = "⚠️ 1,000만 원 미만 혜택 제외";
-                    warn.style.color = "#d32f2f";
-                }
+                dayCell.innerText = days;
+                interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
+            } else {
+                dayCell.innerText = dVal && isExpired ? "소멸" : "-";
+                interest = 0;
             }
-            
-            currentBal = currentBal - aVal - interest;
+            intCell.innerText = interest.toLocaleString();
+            currentBal -= (aVal + interest);
             totalIntSum += interest;
-            row.querySelector('.r-int').innerText = interest.toLocaleString() + "원";
-            row.querySelector('.r-bal').innerText = currentBal.toLocaleString() + "원";
-            if (currentBal < 0) row.querySelector('.r-bal').style.color = "#007bff";
-            else row.querySelector('.r-bal').style.color = "#2e7d32";
         });
 
-        document.getElementById('f-rem-bal').innerText = currentBal.toLocaleString() + "원";
-        const refundArea = document.getElementById('refund-area');
-        const zeroNotice = document.getElementById('zero-notice');
+        document.getElementById('res-bal').innerText = currentBal.toLocaleString() + "원";
 
-        if (fDate) {
-            let finalInt = 0;
-            let fDays = 0;
-            if (!isExpired) {
-                fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
+        let finalInt = 0;
+        if (fDateVal) {
+            if (!isExpired && currentBal > 0) {
+                const fDate = new Date(fDateVal);
+                let fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
                 fDays = Math.max(0, Math.min(100, fDays));
-                // 마지막 잔액이 플러스일 때만 마지막 이자 계산
-                if (currentBal > 0) {
-                    finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
-                }
-                zeroNotice.style.display = 'none';
-            } else {
-                zeroNotice.innerText = "🚨 3/24 기한 도과로 모든 혜택 소멸";
-                zeroNotice.style.display = 'block';
-                totalIntSum = 0;
-            }
-
-            let finalPay = currentBal - finalInt;
-            document.getElementById('f-days').innerText = fDays + "일";
-            document.getElementById('f-int').innerText = finalInt.toLocaleString() + "원";
-            
-            if (finalPay < 0 && !isExpired) {
-                document.getElementById('f-pay').innerText = "최종 실 입금액: 0원";
-                document.getElementById('f-pay-kor').innerText = "영 원";
-                refundArea.style.display = 'block';
-                document.getElementById('refund-val').innerText = Math.abs(finalPay).toLocaleString() + "원";
-            } else {
-                document.getElementById('f-pay').innerText = "최종 실 입금액: " + Math.max(0, finalPay).toLocaleString() + "원";
-                document.getElementById('f-pay-kor').innerText = numberToKorean(Math.max(0, finalPay)) + " 원";
-                refundArea.style.display = 'none';
+                finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
             }
             if (!isExpired) totalIntSum += finalInt;
         }
-        document.getElementById('total-interest').innerText = totalIntSum.toLocaleString();
+        
+        document.getElementById('f-int').innerText = finalInt.toLocaleString();
+        let finalBookBal = currentBal - finalInt; // 실제 장부상 잔액
+        
+        const fBookBalEl = document.getElementById('total-book-bal');
+        fBookBalEl.innerText = finalBookBal.toLocaleString() + "원";
+        fBookBalEl.style.color = finalBookBal < 0 ? "#1565c0" : "#333";
+
+        const fPayEl = document.getElementById('final-pay');
+        const refundMsg = document.getElementById('refund-msg');
+        
+        if (finalBookBal < 0 && !isExpired) {
+            fPayEl.innerText = "0원";
+            refundMsg.style.display = 'block';
+            document.getElementById('refund-amt').innerText = Math.abs(finalBookBal).toLocaleString();
+        } else {
+            fPayEl.innerText = Math.max(0, finalBookBal).toLocaleString() + "원";
+            refundMsg.style.display = 'none';
+        }
+        
+        document.getElementById('total-benefit').innerText = isExpired ? "0" : totalIntSum.toLocaleString();
     }
-    window.onload = () => addRow();
+    window.onload = addRow;
 </script>
 </body>
 </html>
