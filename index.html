@@ -5,36 +5,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>지제역 풍경채 2BL 7% 선납할인 잔금 모의계산기</title>
-    <style>
-        :root { --primary: #2e7d32; --bg: #f4f7f4; --card-bg: #ffffff; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
-        .container { max-width: 480px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
-        header { background: var(--primary); color: white; padding: 12px; text-align: center; }
-        header h1 { margin: 0; font-size: 1.2em; letter-spacing: -1px; }
-        .base-input-area { padding: 12px; background: #1a2a40; color: white; display: flex; align-items: center; justify-content: space-between; }
-        /* [수정] 상단 입력창 노란색 배경 추가 */
-        .base-input-area input { width: 55%; background: #fff9c4; border: none; border-bottom: 2px solid #4db6ac; color: #333; font-size: 1.2em; font-weight: bold; text-align: right; outline: none; border-radius: 4px; padding-right: 5px; }
-        .passbook-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-        .passbook-table th { background: #eee; padding: 8px 5px; color: #666; border-bottom: 1px solid #ddd; }
-        .passbook-table td { padding: 10px 5px; border-bottom: 1px dotted #ddd; text-align: center; }
-        .passbook-table input { width: 90%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; text-align: center; }
-        .txt-red { color: #d32f2f; font-weight: bold; }
-        .btn-add { width: 100%; padding: 12px; background: #fff; border: none; border-bottom: 2px solid #eee; color: var(--primary); font-weight: bold; cursor: pointer; }
-        
-        .final-box { background: #fffde7; padding: 15px; border-top: 3px double #fbc02d; }
-        .final-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95em; color: #444; align-items: center; }
-        .final-main { text-align: center; margin-top: 8px; padding: 12px; background: #fff; border: 2px solid #fbc02d; border-radius: 10px; }
-        .final-main strong { font-size: 1.5em; color: #d32f2f; display: block; }
-        
-        .minus-val { color: #1565c0; font-weight: bold; font-size: 1.1em; }
-        .refund-notice { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-top: 10px; border: 1px solid #2196f3; font-size: 0.95em; color: #0d47a1; text-align: center; }
-        .total-benefit-bar { background: #1a2a40; color: #fff; padding: 12px; text-align: center; font-weight: bold; font-size: 1em; }
-        .expired { background: #ffebee !important; }
-        /* [추가] 필수 및 일수 스타일 */
-        .req-label { color: #ff5252; font-size: 0.8em; font-weight: bold; margin-left: 2px; }
-        .days-info { font-size: 0.85em; color: #666; font-weight: normal; margin-left: 5px; }
-    </style>
-</head>
+    /* 상단 입력 영역 레이아웃 조정 */
+.base-input-area { 
+    padding: 12px; 
+    background: #1a2a40; 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+}
+
+/* 입력창 너비를 48%로 조정 (억 단위 123,456,789에 최적화) */
+.base-input-area input { 
+    width: 48%; 
+    background: #fff9c4; 
+    border: none; 
+    border-bottom: 2px solid #4db6ac; 
+    color: #333; 
+    font-size: 1.2em; 
+    font-weight: bold; 
+    text-align: right; 
+    outline: none; 
+    border-radius: 4px; 
+    padding-right: 5px; 
+}
+
+/* 필수 문구 줄바꿈 방지 및 라벨 공간 확보 */
+.req-label { 
+    color: #ff5252; 
+    font-size: 0.8em; 
+    font-weight: bold; 
+    margin-left: 3px;
+    white-space: nowrap; /* 이게 핵심입니다! 절대 안 떨어져요. */
+}
+
+/* 왼쪽 라벨 텍스트 크기 살짝 조절 */
+.base-input-area label {
+    font-size: 0.95em;
+    white-space: nowrap;
+    flex-shrink: 0; /* 라벨이 찌그러지지 않게 보호 */
+}</head>
 <body>
 
 <div class="container" id="main-cont">
