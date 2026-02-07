@@ -5,53 +5,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>지제역 풍경채 2BL 7% 선납할인 잔금 모의계산기</title>
-    /* 상단 입력 영역 레이아웃 조정 */
-.base-input-area { 
-    padding: 12px; 
-    background: #1a2a40; 
-    color: white; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-}
+    <style>
+        :root { --primary: #2e7d32; --bg: #f4f7f4; --card-bg: #ffffff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 480px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: white; padding: 12px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.2em; letter-spacing: -1px; }
+        
+        /* [수정] 이산가족 상봉 및 억 단위 최적화 */
+        .base-input-area { 
+            padding: 12px; 
+            background: #1a2a40; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .base-input-area label {
+            font-size: 0.95em;
+            white-space: nowrap; /* 라벨 줄바꿈 방지 */
+            flex-shrink: 0;
+        }
+        .base-input-area input { 
+            width: 48%; /* 억 단위 금액에 최적화된 너비 */
+            background: #fff9c4; 
+            border: none; 
+            border-bottom: 2px solid #4db6ac; 
+            color: #333; 
+            font-size: 1.2em; 
+            font-weight: bold; 
+            text-align: right; 
+            outline: none; 
+            border-radius: 4px; 
+            padding-right: 5px; 
+        }
+        .req-label { 
+            color: #ff5252; 
+            font-size: 0.8em; 
+            font-weight: bold; 
+            margin-left: 2px;
+            white-space: nowrap; /* 필수 글자 절대 안 떨어지게 설정 */
+        }
 
-/* 입력창 너비를 48%로 조정 (억 단위 123,456,789에 최적화) */
-.base-input-area input { 
-    width: 48%; 
-    background: #fff9c4; 
-    border: none; 
-    border-bottom: 2px solid #4db6ac; 
-    color: #333; 
-    font-size: 1.2em; 
-    font-weight: bold; 
-    text-align: right; 
-    outline: none; 
-    border-radius: 4px; 
-    padding-right: 5px; 
-}
-
-/* 필수 문구 줄바꿈 방지 및 라벨 공간 확보 */
-.req-label { 
-    color: #ff5252; 
-    font-size: 0.8em; 
-    font-weight: bold; 
-    margin-left: 3px;
-    white-space: nowrap; /* 이게 핵심입니다! 절대 안 떨어져요. */
-}
-
-/* 왼쪽 라벨 텍스트 크기 살짝 조절 */
-.base-input-area label {
-    font-size: 0.95em;
-    white-space: nowrap;
-    flex-shrink: 0; /* 라벨이 찌그러지지 않게 보호 */
-}</head>
+        .passbook-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .passbook-table th { background: #eee; padding: 8px 5px; color: #666; border-bottom: 1px solid #ddd; }
+        .passbook-table td { padding: 10px 5px; border-bottom: 1px dotted #ddd; text-align: center; }
+        .passbook-table input { width: 90%; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; text-align: center; }
+        .txt-red { color: #d32f2f; font-weight: bold; }
+        .btn-add { width: 100%; padding: 12px; background: #fff; border: none; border-bottom: 2px solid #eee; color: var(--primary); font-weight: bold; cursor: pointer; }
+        
+        .final-box { background: #fffde7; padding: 15px; border-top: 3px double #fbc02d; }
+        .final-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.95em; color: #444; align-items: center; }
+        .final-main { text-align: center; margin-top: 8px; padding: 12px; background: #fff; border: 2px solid #fbc02d; border-radius: 10px; }
+        .final-main strong { font-size: 1.5em; color: #d32f2f; display: block; }
+        
+        .minus-val { color: #1565c0; font-weight: bold; font-size: 1.1em; }
+        .refund-notice { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-top: 10px; border: 1px solid #2196f3; font-size: 0.95em; color: #0d47a1; text-align: center; }
+        .total-benefit-bar { background: #1a2a40; color: #fff; padding: 12px; text-align: center; font-weight: bold; font-size: 1em; }
+        .expired { background: #ffebee !important; }
+        .days-info { font-size: 0.85em; color: #666; font-weight: normal; margin-left: 5px; }
+    </style>
+</head>
 <body>
 
 <div class="container" id="main-cont">
     <header><h1>지제역 풍경채 2BL 7%할인 잔금자동계산기</h1></header>
 
     <div class="base-input-area">
-        <label style="font-size:1em;">당초 분양잔금액(30%)<span class="req-label">(필수)</span></label>
+        <label>당초 분양잔금액(30%)<span class="req-label">(필수)</span></label>
         <input type="text" id="base-total" oninput="updateFormat(this)" placeholder="0">
     </div>
 
@@ -131,20 +152,16 @@
     }
 
     function calculate() {
-        // [추가] 젤 위 잔금부터 입력하라는 '똑똑한 가이드'
         let baseInput = document.getElementById('base-total');
         let baseTotal = parseInt(baseInput.value.replace(/,/g, '')) || 0;
-        
         const rows = document.querySelectorAll('#row-body tr');
         const fDateVal = document.getElementById('final-date').value;
 
-        // 사용자가 무언가 입력하려고 하는데 상단 잔금이 0이면 경고
-        if (baseTotal === 0 && (rows.length > 0 || fDateVal)) {
-            // 입금일이나 금액이 하나라도 채워져 있으면 알림
-            let hasAnyInput = false;
-            rows.forEach(r => { if(r.querySelector('.i-date').value || r.querySelector('.i-amt').value) hasAnyInput = true; });
-            
-            if (hasAnyInput || fDateVal) {
+        // [똑똑한 가이드] 젤 위 잔금부터 입력하라는 로직
+        if (baseTotal === 0 && (fDateVal || rows.length > 0)) {
+            let hasInput = false;
+            rows.forEach(r => { if(r.querySelector('.i-date').value || r.querySelector('.i-amt').value) hasInput = true; });
+            if (hasInput || fDateVal) {
                 alert("젤위 잔금(30%)금액부터 입력하세요! 😊");
                 baseInput.focus();
                 return;
@@ -153,12 +170,10 @@
 
         let currentBal = baseTotal;
         const isExpired = fDateVal && new Date(fDateVal) > LIMIT_D;
-        
         document.getElementById('main-cont').className = isExpired ? 'container expired' : 'container';
         document.getElementById('warn-msg').style.display = isExpired ? 'block' : 'none';
 
         let totalIntSum = 0;
-
         rows.forEach(row => {
             const dVal = row.querySelector('.i-date').value;
             const aVal = parseInt(row.querySelector('.i-amt').value.replace(/,/g, '')) || 0;
@@ -184,17 +199,14 @@
         document.getElementById('res-bal').innerText = currentBal.toLocaleString() + "원";
 
         let finalInt = 0;
-        let fDays = 0; // [추가] 최종 일수 변수
         if (fDateVal) {
             const fDate = new Date(fDateVal);
-            fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
+            let fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
             fDays = Math.max(0, Math.min(100, fDays));
-
             if (!isExpired && currentBal > 0) {
                 finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
             }
             if (!isExpired) totalIntSum += finalInt;
-            // [추가] 우측에 일수 표시
             document.getElementById('f-days-info').innerText = `(일수: ${fDays}일)`;
         } else {
             document.getElementById('f-days-info').innerText = "";
@@ -202,14 +214,12 @@
         
         document.getElementById('f-int').innerText = finalInt.toLocaleString();
         let finalBookBal = currentBal - finalInt; 
-        
         const fBookBalEl = document.getElementById('total-book-bal');
         fBookBalEl.innerText = finalBookBal.toLocaleString() + "원";
         fBookBalEl.style.color = finalBookBal < 0 ? "#1565c0" : "#333";
 
         const fPayEl = document.getElementById('final-pay');
         const refundMsg = document.getElementById('refund-msg');
-        
         if (finalBookBal < 0 && !isExpired) {
             fPayEl.innerText = "0원";
             refundMsg.style.display = 'block';
@@ -218,7 +228,6 @@
             fPayEl.innerText = Math.max(0, finalBookBal).toLocaleString() + "원";
             refundMsg.style.display = 'none';
         }
-        
         document.getElementById('total-benefit').innerText = isExpired ? "0" : totalIntSum.toLocaleString();
     }
     window.onload = addRow;
