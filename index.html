@@ -110,25 +110,24 @@
     누적 활용 횟수: <span id="total-hits-text" style="font-weight: bold; color: #2e7d32;">989</span>회
 </div>
 
-<img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=본인의_깃허브_주소" 
-     style="display:none;" 
-     onload="updateCounter()">
-
 <script>
-    function updateCounter() {
-        // 989부터 시작하게 만드는 로직
-        const baseCount = 989;
+    // 페이지가 열리자마자 바로 실행되게 만듭니다.
+    (function() {
+        const baseCount = 989; // 시작 숫자
         const displayEl = document.getElementById('total-hits-text');
         
-        // 이전에 이 페이지를 열었을 때 저장된 로컬 카운트를 가져옴 (간이 방식)
-        let sessionCount = parseInt(localStorage.getItem('my_calc_hits') || '0');
-        sessionCount++;
-        localStorage.setItem('my_calc_hits', sessionCount);
+        // 내 브라우저에 저장된 숫자 가져와서 1 더하기
+        let myCount = parseInt(localStorage.getItem('my_calc_hits') || '0');
+        myCount++;
+        localStorage.setItem('my_calc_hits', myCount);
         
-        // 화면에 표시 (989 + 현재 접속 횟수)
-        displayEl.innerText = (baseCount + sessionCount).toLocaleString();
-    }
-</script>    
+        // 화면에 바로 보여주기
+        if(displayEl) {
+            displayEl.innerText = (baseCount + myCount).toLocaleString();
+        }
+    })();
+</script>   
+    
 <script>
     const RATE = 0.07;
     const END_D = new Date('2026-05-04');
