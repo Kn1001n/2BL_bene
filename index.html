@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지제역 풍경채 2BL 잔금 계산기 (이자 재할인 반영)</title>
+    <title>지제역 풍경채 2BL 잔금 계산기 (원금차감 방식)</title>
     <style>
         :root { --primary: #2e7d32; --bg: #f4f7f4; --card-bg: #ffffff; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
@@ -16,7 +16,7 @@
         .base-input-area label { font-size: 0.95em; white-space: nowrap; flex-shrink: 0; }
         .base-input-area input { width: 48%; background: #fff9c4; border: none; border-bottom: 2px solid #4db6ac; color: #333; font-size: 1.2em; font-weight: bold; text-align: right; border-radius: 4px; padding-right: 5px; }
         
-        .req-label { color: #ff5252; font-size: 0.8em; font-weight: bold; margin-left: 2px; white-space: nowrap; }
+        .req-label { color: #ff5252; font-size: 0.8em; font-weight: bold; margin-left: 2px; }
 
         .passbook-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
         .passbook-table th { background: #eee; padding: 8px 5px; color: #666; border-bottom: 1px solid #ddd; }
@@ -31,17 +31,14 @@
         .final-main { text-align: center; margin-top: 8px; padding: 12px; background: #fff; border: 2px solid #fbc02d; border-radius: 10px; }
         .final-main strong { font-size: 1.5em; color: #d32f2f; display: block; }
         
-        .minus-val { color: #1565c0; font-weight: bold; font-size: 1.1em; }
-        .refund-notice { background: #e3f2fd; border-radius: 8px; padding: 12px; margin-top: 10px; border: 1px solid #2196f3; font-size: 0.95em; color: #0d47a1; text-align: center; }
         .total-benefit-bar { background: #1a2a40; color: #fff; padding: 12px; text-align: center; font-weight: bold; font-size: 1em; }
-        .expired { background: #ffebee !important; }
         .days-info { font-size: 0.85em; color: #666; font-weight: normal; margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container" id="main-cont">
-    <header><h1>지제역 풍경채 2BL 잔금자동계산기</h1></header>
+    <header><h1>지제역 풍경채 2BL 잔금 계산기</h1></header>
 
     <div class="base-input-area">
         <label>당초 분양잔금액(30%)<span class="req-label">(필수)</span></label>
@@ -54,7 +51,7 @@
                 <th width="30%">입금일</th>
                 <th width="35%">입금원금</th>
                 <th width="15%">일수</th>
-                <th width="20%">이자혜택</th>
+                <th width="20%">할인금액</th>
             </tr>
         </thead>
         <tbody id="row-body"></tbody>
@@ -64,40 +61,27 @@
 
     <div class="final-box">
         <div class="final-row">
-            <span>중간 원금+이자 합산 잔액</span>
-            <span id="res-bal" style="font-weight:bold;">0</span>
+            <span>중간 입금 반영된 원금 잔액</span>
+            <span id="res-bal" style="font-weight:bold;">0원</span>
         </div>
         <div class="final-row">
             <label>🗓️ 최종 완납 예정일<span class="req-label">(필수)</span></label>
             <input type="date" id="final-date" oninput="calculate()" style="font-size:1em; border:2px solid #fbc02d; padding:2px; background-color: #fff9c4;">
         </div>
         
-        <div class="final-row" style="color:#d32f2f; font-size: 0.85em; border-top: 1px dotted #ccc; padding-top: 5px;">
-            <span>이전 이자들에 대한 추가 7%할인</span>
-            <span>- <span id="interest-re-discount">0</span></span>
-        </div>
-
-        <div class="final-row" style="color:#d32f2f;">
-            <span>최종 회차 잔액 할인 <span id="f-days-info" class="days-info"></span></span>
+        <div class="final-row" style="color:#d32f2f; border-top: 1px dotted #ccc; padding-top: 8px; margin-top: 5px;">
+            <span>최종 회차분 할인 <span id="f-days-info" class="days-info"></span></span>
             <span>- <span id="f-int">0</span></span>
         </div>
 
-        <div class="final-row" style="border-top:1px dashed #ccc; padding-top:5px; margin-top:5px;">
-            <span>최종 장부상 잔액</span>
-            <span id="total-book-bal" class="minus-val">0</span>
+        <div class="final-row" style="color:#d32f2f;">
+            <span>중간 입금 선납할인 합계</span>
+            <span>- <span id="mid-int-sum">0</span></span>
         </div>
         
         <div class="final-main">
-            <label id="final-label" style="font-size:0.85em; font-weight:bold; color:#666;">최종 실 입금액 (분양대금)</label>
-            <strong id="final-pay">0</strong>
-        </div>
-
-        <div id="refund-msg" class="refund-notice" style="display:none;">
-            💰 <b>환급 가능 이자: <span id="refund-amt">0</span>원</b>
-        </div>
-        
-        <div id="warn-msg" style="color:red; font-size:0.85em; font-weight:bold; margin-top:10px; display:none; text-align:center;">
-            🚨 3/24 기한 도과! 모든 선납 혜택이 소멸되었습니다.
+            <label style="font-size:0.85em; font-weight:bold; color:#666;">최종 실 입금액 (분양대금)</label>
+            <strong id="final-pay">0원</strong>
         </div>
     </div>
 
@@ -106,32 +90,13 @@
     </div>
 </div>
 
-<div style="text-align:center; padding: 15px 0; color: #666; font-size: 0.85em; background: #f4f7f4; border-top: 1px solid #eee;">
-    누적 활용 횟수: <span id="total-hits-text" style="font-weight: bold; color: #2e7d32;">989</span>회
+<div style="text-align:center; padding: 15px 0; color: #666; font-size: 0.85em;">
+    누적 활용 횟수: <span id="total-hits-text" style="font-weight: bold; color: #2e7d32;">990</span>회
 </div>
 
 <script>
-    // 페이지가 열리자마자 바로 실행되게 만듭니다.
-    (function() {
-        const baseCount = 989; // 시작 숫자
-        const displayEl = document.getElementById('total-hits-text');
-        
-        // 내 브라우저에 저장된 숫자 가져와서 1 더하기
-        let myCount = parseInt(localStorage.getItem('my_calc_hits') || '0');
-        myCount++;
-        localStorage.setItem('my_calc_hits', myCount);
-        
-        // 화면에 바로 보여주기
-        if(displayEl) {
-            displayEl.innerText = (baseCount + myCount).toLocaleString();
-        }
-    })();
-</script>   
-    
-<script>
     const RATE = 0.07;
     const END_D = new Date('2026-05-04');
-    const LIMIT_D = new Date('2026-03-24');
 
     function updateFormat(el) {
         let val = el.value.replace(/[^0-9]/g, '');
@@ -157,21 +122,8 @@
         const rows = document.querySelectorAll('#row-body tr');
         const fDateVal = document.getElementById('final-date').value;
 
-        if (baseTotal === 0 && (fDateVal || rows.length > 0)) {
-            let hasInput = false;
-            rows.forEach(r => { if(r.querySelector('.i-date').value || r.querySelector('.i-amt').value) hasInput = true; });
-            if (hasInput || fDateVal) {
-                alert("가장 위 잔금(30%) 금액부터 입력하세요! 😊");
-                baseInput.focus();
-                return;
-            }
-        }
-
-        let currentBal = baseTotal;
-        let prevInterestsSum = 0; // 중간 입금에서 발생한 이자들의 합
-        const isExpired = fDateVal && new Date(fDateVal) > LIMIT_D;
-        document.getElementById('main-cont').className = isExpired ? 'container expired' : 'container';
-        document.getElementById('warn-msg').style.display = isExpired ? 'block' : 'none';
+        let currentBookBal = baseTotal; // 장부상 원금 (원금만 차감)
+        let midInterestsSum = 0; // 중간 입금 할인액 합계
 
         // 1. 중간 입금 계산
         rows.forEach(row => {
@@ -181,70 +133,49 @@
             const intCell = row.querySelector('.r-int');
 
             let interest = 0;
-            if (dVal && !isExpired && aVal >= 10000000) {
+            if (dVal && aVal >= 1000000) {
                 const pDate = new Date(dVal);
                 let days = Math.floor((END_D - pDate) / (1000 * 60 * 60 * 24)) + 1;
                 days = Math.max(0, Math.min(100, days));
                 dayCell.innerText = days;
+                // 10원 단위 절사
                 interest = Math.floor((aVal * RATE * days / 365) / 10) * 10;
             } else {
-                dayCell.innerText = dVal && isExpired ? "소멸" : "-";
-                interest = 0;
+                dayCell.innerText = "-";
             }
             intCell.innerText = interest.toLocaleString();
-            currentBal -= (aVal + interest);
-            prevInterestsSum += interest; 
+            
+            currentBookBal -= aVal; // 핵심: 이자가 아닌 원금만 차감
+            midInterestsSum += interest;
         });
 
-        document.getElementById('res-bal').innerText = currentBal.toLocaleString() + "원";
+        document.getElementById('res-bal').innerText = currentBookBal.toLocaleString() + "원";
+        document.getElementById('mid-int-sum').innerText = midInterestsSum.toLocaleString();
 
         // 2. 최종 완납일 기준 계산
-        let finalInt = 0; // 남은 원금에 대한 할인
-        let reDiscount = 0; // 중간 이자 합계에 대한 추가 할인
-        
+        let finalInt = 0;
         if (fDateVal) {
             const fDate = new Date(fDateVal);
             let fDays = Math.floor((END_D - fDate) / (1000 * 60 * 60 * 24)) + 1;
             fDays = Math.max(0, Math.min(100, fDays));
             
-            if (!isExpired) {
-                // 원금에 대한 할인
-                if (currentBal > 0) {
-                    finalInt = Math.floor((currentBal * RATE * fDays / 365) / 10) * 10;
-                }
-                // [수정 핵심] 중간 이자 합계에 대해서도 최종완납일의 남은 일수(fDays)를 적용하여 할인
-                if (prevInterestsSum > 0) {
-                    reDiscount = Math.floor((prevInterestsSum * RATE * fDays / 365) / 10) * 10;
-                }
+            // 아직 남아있는 '장부상 원금' 전체에 대해 할인 적용
+            if (currentBookBal > 0) {
+                finalInt = Math.floor((currentBookBal * RATE * fDays / 365) / 10) * 10;
             }
             document.getElementById('f-days-info').innerText = `(일수: ${fDays}일)`;
-        } else {
-            document.getElementById('f-days-info').innerText = "";
         }
-        
-        // UI 반영
-        document.getElementById('interest-re-discount').innerText = reDiscount.toLocaleString();
+
         document.getElementById('f-int').innerText = finalInt.toLocaleString();
         
-        let finalBookBal = currentBal - finalInt - reDiscount; 
-        const fBookBalEl = document.getElementById('total-book-bal');
-        fBookBalEl.innerText = finalBookBal.toLocaleString() + "원";
+        // 3. 최종 결과 산출
+        let totalBenefit = midInterestsSum + finalInt;
+        let finalPay = currentBookBal - totalBenefit;
 
-        const fPayEl = document.getElementById('final-pay');
-        const refundMsg = document.getElementById('refund-msg');
-        
-        if (finalBookBal < 0 && !isExpired) {
-            fPayEl.innerText = "0원";
-            refundMsg.style.display = 'block';
-            document.getElementById('refund-amt').innerText = Math.abs(finalBookBal).toLocaleString();
-        } else {
-            fPayEl.innerText = Math.max(0, finalBookBal).toLocaleString() + "원";
-            refundMsg.style.display = 'none';
-        }
-        
-        const totalBenefit = isExpired ? 0 : (prevInterestsSum + finalInt + reDiscount);
+        document.getElementById('final-pay').innerText = Math.max(0, finalPay).toLocaleString() + "원";
         document.getElementById('total-benefit').innerText = totalBenefit.toLocaleString();
     }
+
     window.onload = addRow;
 </script>
 </body>
